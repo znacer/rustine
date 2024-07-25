@@ -12,8 +12,8 @@ impl Variable {
     }
 
     pub fn set_value(&mut self, value: i32) {
-        if self.domain.contains(&value) {
             self.value = Some(value);
+        if self.domain.contains(&value) {
         }
     }
     pub fn unset_value(&mut self) {
