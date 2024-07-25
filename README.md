@@ -49,4 +49,4 @@ cargo test
 ```
 **License**
 
-Rustine is licensed under the MIT License. See the LICENSE file for details.
+Rustine is licensed under the GPL-3.0 License. See the LICENSE file for details.
