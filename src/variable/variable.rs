@@ -1,15 +1,21 @@
+#[derive(Debug, Clone)]
 pub struct Variable {
+    name: String,
     domain: Vec<i32>,
     value: Option<i32>,
 }
 
 impl Variable {
-    pub fn new(domain: Vec<i32>) -> Self {
+    pub fn new(name: &str, domain: Vec<i32>) -> Self {
         Variable {
+            name: name.to_owned(),
             domain,
             value: None,
         }
     }
+     pub fn get_name(&self) -> &str {
+         &self.name
+     }
 
     pub fn set_value(&mut self, value: i32) {
             self.value = Some(value);

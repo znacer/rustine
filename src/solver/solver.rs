@@ -1,29 +1,39 @@
+use std::collections::HashMap;
+
 use crate::Constraint;
 use crate::InequalityConstraint;
 use crate::Variable;
 
 pub struct Solver {
-    variables: Vec<Variable>,
+    variables: HashMap<String, Variable>,
     constraints: Vec<InequalityConstraint>,
 }
 
 impl Solver {
     pub fn new() -> Self {
         Solver {
-            variables: vec![],
+            variables: HashMap::new(),
             constraints: vec![],
         }
     }
 
     pub fn add_variable(&mut self, variable: Variable) {
-        self.variables.push(variable);
+        self.variables.insert(variable.get_name().to_owned() , variable);
     }
 
     pub fn add_constraint(&mut self, constraint: InequalityConstraint) {
+        // check if variables already exists
+        for var_name in constraint.get_variables().iter() {
+            match self.variables.get(var_name) {
+                None => {panic!("Variable of the constraint are not known by the solver")},
+                _ => {..}
+            };
+
+        }
         self.constraints.push(constraint);
     }
 
-    pub fn variables(&self) -> &Vec<Variable> {
+    pub fn variables(&self) -> &HashMap<String, Variable> {
         &self.variables
     }
 
@@ -31,32 +41,41 @@ impl Solver {
         &self.constraints
     }
 
-    pub fn solve(&self) -> Option<Vec<i32>> {
-        let mut values = vec![];
-        self.solve_recursive(&mut values, 0)
+    pub fn solve(&self) -> Option<HashMap<String, i32>> {
+        // let mut values = vec![];
+        let mut values: HashMap<String, i32>= HashMap::new();
+        self.solve_recursive(&mut values)
     }
 
-    fn solve_recursive(&self, values: &mut Vec<i32>, index: usize) -> Option<Vec<i32>> {
-        if index == self.variables.len() {
+    fn solve_recursive(&self, values: &mut HashMap<String, i32>) -> Option<HashMap<String, i32>> {
+        if values.len() == self.variables.len() {
             if self.satisfies_constraints(values) {
                 return Some(values.clone());
             } else {
                 return None;
             }
         }
+        let mut index: String = "".to_string();
+        'keyloop: for test_key in self.variables.clone().into_keys().collect::<Vec<String>>().iter() {
+            if values.get(test_key) == None {
+                    index = test_key.to_owned();
+                    break 'keyloop;
+            }
+        }
 
-        for value in &self.variables[index].get_domain() {
-            values.push(*value);
-            if let Some(solution) = self.solve_recursive(values, index + 1) {
+        for value in &self.variables.get(&index)?.get_domain() {
+            values.insert(index.to_owned(), *value);
+            if let Some(solution) = self.solve_recursive(values) {
                 return Some(solution);
             }
-            values.pop();
+
+            values.remove(&index);
         }
 
         None
     }
 
-    fn satisfies_constraints(&self, values: &Vec<i32>) -> bool {
+    fn satisfies_constraints(&self, values: &HashMap<String, i32>) -> bool {
         for constraint in &self.constraints {
             if !constraint.evaluate(values) {
                 return false;
